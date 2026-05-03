@@ -14,10 +14,12 @@ import { CrearInformeEmergenciaDto } from './dto/crear-informe-emergencia.dto';
 export class EmergenciasController {
   constructor(private readonly emergenciasService: EmergenciasService){}
 //
-@UseGuards(AuthGuard, RolesGuard)
-@Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
+//@UseGuards(AuthGuard, RolesGuard)
+//@Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
 @Post()
 crear(@Body() dto: CreateEmergenciaDto, @Request() req) {
+  console.log("xxxxx",req);
+    console.log("111111r",req.user);
     const id_voluntario = req.user.id_voluntario;
     return this.emergenciasService.crear(dto, id_voluntario);
   }

@@ -9,6 +9,8 @@ export class TurnoService {
     constructor(private prisma: PrismaService) { }
 
     createTurno(dto: CrearTurnoDto) {// turnos tarde o manina
+        console.log("dto--",dto);
+        
         return this.prisma.turno.create({
             data: dto
         });

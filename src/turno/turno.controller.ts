@@ -10,6 +10,8 @@ export class TurnoController {
     
      @Post()
         createTurno(@Body() dto: CrearTurnoDto) {
+          console.log("---",dto);
+          
             return this.turnoService.createTurno(dto );
           }
         

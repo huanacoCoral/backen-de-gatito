@@ -16,6 +16,11 @@ export class MaterialController {
     crearIngresarMaterial(@Body() dto:CreateInformeMaterialDto){
         return this.materialService.crearIngresarMaterial(dto)
     }
+    
+    @Post('actualizar-ingresar-material-:id')
+    actualizarMaterial(@Param('id') id: string,@Body() dto:CreateInformeMaterialDto){
+        return this.materialService.actualizarMaterial(+id,dto)
+    }
     @Post('crear-lote')
     crearLote(@Body() dto: CrearLoteMaterialDto){
         return this.materialService.crearLote(dto)

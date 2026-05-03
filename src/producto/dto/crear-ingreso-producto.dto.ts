@@ -10,4 +10,5 @@ export class CrearIngresoProductoDto{
       registroMantenimiento: string;
       fechaAdquisicion: string;
       id_voluntario: number;
+      id_loteProducto:number
     }

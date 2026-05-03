@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateVehiculoDto } from './dto/create-vehiculos.dto';
 import { VehiculosService } from './vehiculos.service';
 import { IngresoVehiculoDto } from './dto/ingreso-vehiculo.dto';
@@ -24,15 +24,32 @@ export class VehiculosController {
     registrarIngreso(@Body() dto: IngresoVehiculoDto) {
     return this.vehiculoService.registrarIngreso(dto);
     }
+    @Get('ingreso')
+        findAll() {
+          return this.vehiculoService.listarIngresosVehiculos();
+      }
+    @Put('ingreso-editar/:id')
+    editar (@Param('id') id: string,@Body() dto: IngresoVehiculoDto) 
+    { return this.vehiculoService.editarIngresosVehiculos(+id,dto);}
+
+     @Put('eliminar-editar/:id')
+    eliminar (@Param('id') id: string,@Body() dto: any) 
+    { return this.vehiculoService.eliminarIngresosVehiculos(+id,dto);}
     //lotes del vehiculo 
-    @Post('lote')
+   /* @Get('lote')
+listarLote() {
+  return this.vehiculoService.listarLote();
+}*/
+
+   /* @Post('lote')
 crearLote(@Body() dto: CrearLoteVehiculoDto) {
   return this.vehiculoService.crearLote(dto);
-}
+}*/
+/*
 @Post('lote-ingreso')
 vincularIngreso(@Body() dto: VincularIngresoLoteDto) {
   return this.vehiculoService.vincularIngresoALote(dto);
-}
+}*/
 @Post('conduccion')
 registrarConduccion(@Body() dto: RegistrarConduccionDto) {
   return this.vehiculoService.registrarConduccion(dto);

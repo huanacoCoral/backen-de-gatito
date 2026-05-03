@@ -1,5 +1,5 @@
 export class IngresoVehiculoDto {
-  tipo: string;
+    tipo: string;
   nombre: string;
   marca: string;
   modelo: string;

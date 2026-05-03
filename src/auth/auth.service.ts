@@ -113,6 +113,7 @@ export class AuthService {
 
             return {
             rol: rolActual.rol.nombre,
+            id_voluntario: usuario.id_voluntario,
             access_token: this.jwtService.sign(payload),
             };
 

@@ -16,4 +16,5 @@ export class CreateInformeMaterialDto {
     intervaloTiempoRevision: string;
     id_voluntario: number; 
     id_loteMaterial:number;
+    id_modificacion?:number;
 }

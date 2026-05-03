@@ -25,7 +25,7 @@ export class PersonalService {
     return this.prisma.voluntario.findMany({
       where: {
         estado: {
-          not: 'DE-BAJA',
+          not: 'B',
         },
       },
     });
@@ -33,7 +33,7 @@ export class PersonalService {
   listarPersonalDeBaja() {
     return this.prisma.voluntario.findMany({
       where: {
-        estado: 'DE-BAJA',
+        estado: 'B',
       },
     });
   }
@@ -48,13 +48,13 @@ crearVoluntario(dto: CreateVoluntarioDto) {
       telefono_emergencia: dto.telefono_emergencia,
       
       // Conversión explícita a Date para evitar errores de tipo DateTime
-      fecha_nacimiento:    new Date(dto.fecha_nacimiento),
-      
-      sexo:                dto.sexo,
-      direccion:           dto.direccion,
-      correo_personal:     dto.correo_personal,
-      observaciones:       dto.observaciones,
-    },
+        fecha_nacimiento:    new Date(dto.fecha_nacimiento),
+        
+        sexo:                dto.sexo,
+        direccion:           dto.direccion,
+        correo_personal:     dto.correo_personal,
+        observaciones:       dto.observaciones,
+      },
   });
 }
 
@@ -78,7 +78,8 @@ crearVoluntario(dto: CreateVoluntarioDto) {
       direccion:           dto.datos.direccion,
       correo_personal:     dto.datos.correo_personal,
       observaciones:       dto.datos.observaciones,
-      estado: dto.datos.estado
+      estado: dto.datos.estado,
+      id_modificacion: dto.id_modificacion,
     },
   });
 
@@ -106,7 +107,8 @@ async eliminar( dto: any) {
       direccion:           dto.direccion,
       correo_personal:     dto.correo_personal,
       observaciones:       dto.observaciones,
-      estado: 'DE-BAJA'
+      estado: 'B',
+      id_modificacion: dto.id_modificacion,
     },
   });
 

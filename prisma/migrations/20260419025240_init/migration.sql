@@ -10,6 +10,19 @@ CREATE TABLE "Usuario" (
 -- CreateTable
 CREATE TABLE "Voluntario" (
     "id_voluntario" SERIAL NOT NULL,
+    "nombre" TEXT NOT NULL,
+    "apellido_paterno" TEXT NOT NULL,
+    "apellido_materno" TEXT,
+    "ci" TEXT NOT NULL,
+    "telefono" TEXT NOT NULL,
+    "telefono_emergencia" TEXT,
+    "fecha_nacimiento" TIMESTAMP(3),
+    "sexo" TEXT,
+    "direccion" TEXT,
+    "correo_personal" TEXT,
+    "fecha_ingreso" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "estado" TEXT NOT NULL DEFAULT 'ACTIVO',
+    "observaciones" TEXT,
 
     CONSTRAINT "Voluntario_pkey" PRIMARY KEY ("id_voluntario")
 );
@@ -63,24 +76,6 @@ CREATE TABLE "Vehiculo" (
 );
 
 -- CreateTable
-CREATE TABLE "loteVehiculo" (
-    "id_loteVehiculo" SERIAL NOT NULL,
-    "stock" INTEGER NOT NULL,
-    "tipo" TEXT NOT NULL,
-    "id_vehiculo" INTEGER NOT NULL,
-
-    CONSTRAINT "loteVehiculo_pkey" PRIMARY KEY ("id_loteVehiculo")
-);
-
--- CreateTable
-CREATE TABLE "lotVehi_contiene_ingInfVehi" (
-    "id_loteVehiculo" INTEGER NOT NULL,
-    "id_informeIngresoVehiculo" INTEGER NOT NULL,
-
-    CONSTRAINT "lotVehi_contiene_ingInfVehi_pkey" PRIMARY KEY ("id_loteVehiculo","id_informeIngresoVehiculo")
-);
-
--- CreateTable
 CREATE TABLE "ingresoInformeVehiculo" (
     "id_ingresoInformeVehiculo" SERIAL NOT NULL,
     "tipo" TEXT NOT NULL,
@@ -95,7 +90,7 @@ CREATE TABLE "ingresoInformeVehiculo" (
     "intervaloTiempoRevision" TEXT NOT NULL,
     "registroDocumentacion" TEXT NOT NULL,
     "id_voluntario" INTEGER NOT NULL,
-    "id_loteVehiculo" INTEGER,
+    "id_vehiculo" INTEGER NOT NULL,
 
     CONSTRAINT "ingresoInformeVehiculo_pkey" PRIMARY KEY ("id_ingresoInformeVehiculo")
 );
@@ -130,7 +125,8 @@ CREATE TABLE "Vol_recepcion_emer" (
 -- CreateTable
 CREATE TABLE "registroMaterial" (
     "id_registroMaterial" SERIAL NOT NULL,
-    "nombre" TEXT,
+    "unidadMedida" TEXT NOT NULL,
+    "cantidadUnidad" INTEGER NOT NULL,
 
     CONSTRAINT "registroMaterial_pkey" PRIMARY KEY ("id_registroMaterial")
 );
@@ -301,7 +297,9 @@ CREATE TABLE "Rol" (
 -- CreateTable
 CREATE TABLE "TurnoTrayecto" (
     "id_turnoTrayecto" SERIAL NOT NULL,
-    "fecha" TIMESTAMP(3) NOT NULL,
+    "fechaInicio" TIMESTAMP(3),
+    "fechaFin" TIMESTAMP(3),
+    "dia" TEXT,
     "id_turno" INTEGER NOT NULL,
     "d_voluntario" INTEGER NOT NULL,
 
@@ -331,6 +329,9 @@ CREATE TABLE "RolTrayecto" (
 -- CreateIndex
 CREATE UNIQUE INDEX "Usuario_email_key" ON "Usuario"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Voluntario_ci_key" ON "Voluntario"("ci");
+
 -- AddForeignKey
 ALTER TABLE "Usuario" ADD CONSTRAINT "Usuario_id_voluntario_fkey" FOREIGN KEY ("id_voluntario") REFERENCES "Voluntario"("id_voluntario") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -347,19 +348,10 @@ ALTER TABLE "Emer_tiene_TipoEmer" ADD CONSTRAINT "Emer_tiene_TipoEmer_id_emergen
 ALTER TABLE "Emer_tiene_TipoEmer" ADD CONSTRAINT "Emer_tiene_TipoEmer_id_tipoEmergencia_fkey" FOREIGN KEY ("id_tipoEmergencia") REFERENCES "TipoEmergencia"("id_tipoEmergencia") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "loteVehiculo" ADD CONSTRAINT "loteVehiculo_id_vehiculo_fkey" FOREIGN KEY ("id_vehiculo") REFERENCES "Vehiculo"("id_vehiculo") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "lotVehi_contiene_ingInfVehi" ADD CONSTRAINT "lotVehi_contiene_ingInfVehi_id_loteVehiculo_fkey" FOREIGN KEY ("id_loteVehiculo") REFERENCES "loteVehiculo"("id_loteVehiculo") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "lotVehi_contiene_ingInfVehi" ADD CONSTRAINT "lotVehi_contiene_ingInfVehi_id_informeIngresoVehiculo_fkey" FOREIGN KEY ("id_informeIngresoVehiculo") REFERENCES "ingresoInformeVehiculo"("id_ingresoInformeVehiculo") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "ingresoInformeVehiculo" ADD CONSTRAINT "ingresoInformeVehiculo_id_voluntario_fkey" FOREIGN KEY ("id_voluntario") REFERENCES "Voluntario"("id_voluntario") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ingresoInformeVehiculo" ADD CONSTRAINT "ingresoInformeVehiculo_id_loteVehiculo_fkey" FOREIGN KEY ("id_loteVehiculo") REFERENCES "loteVehiculo"("id_loteVehiculo") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ingresoInformeVehiculo" ADD CONSTRAINT "ingresoInformeVehiculo_id_vehiculo_fkey" FOREIGN KEY ("id_vehiculo") REFERENCES "Vehiculo"("id_vehiculo") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Mantenimiento" ADD CONSTRAINT "Mantenimiento_id_vehiculo_fkey" FOREIGN KEY ("id_vehiculo") REFERENCES "Vehiculo"("id_vehiculo") ON DELETE RESTRICT ON UPDATE CASCADE;

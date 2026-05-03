@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductoService } from './producto.service';
@@ -33,6 +33,11 @@ export class ProductoController {
     listarLotesProducto() {
         return this.productoService.listarLotesProducto();
       }
+      
+      @Put('actualizar-lote-producto/:id')   
+    actualizarLoteProducto(@Param('id') id: string,@Body() dto: CrearLoteProductoDto) {
+        return this.productoService.actualizarLoteProducto(+id,dto );
+      }
       @Post('crear-ingreso-producto')   
     createIngresoProducto(@Body() dto: CrearIngresoProductoDto) {
         return this.productoService.createIngresoProducto(dto );
@@ -41,6 +46,19 @@ export class ProductoController {
     listarIngresosProducto() {
         return this.productoService.listarIngresosProducto( );
       }
+
+      @Put('actualizar-ingreso-producto/:id')   
+    actualizarIngresoProducto(@Param('id') id: string,@Body() dto: any) {
+        return this.productoService.actualizarIngresoProducto(+id,dto );
+      }
+      @Put('eliminar-ingreso-producto/:id')   
+    eliminarIngresoProducto(@Param('id') id: string,@Body() dto: any) {
+        return this.productoService.eliminarIngresoProducto(+id,dto );
+      }
+
+
+      
+
       @Post('crear-resgistro-producto')   
     vincularIngresoLoteProducto(@Body() dto: VincularIngresoLoteDto) {
         return this.productoService.vincularIngresoLoteProducto(dto );
@@ -57,10 +75,10 @@ export class ProductoController {
     historialLoteProducto(@Body() dto: ListarLote) {
         return this.productoService.historialLoteProducto(dto );
       }
-      @Post('crear-resgistro-producto')   
+      /*@Post('crear-resgistro-producto')   
     ingresosProductoPorVoluntario(@Body() dto: ListarIngesosRealizadoPorVoluntario) {
         return this.productoService.ingresosProductoPorVoluntario(dto );
-      }
+      }*/
      
 
 

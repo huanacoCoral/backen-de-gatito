@@ -20,6 +20,11 @@ model Usuario {
   email         String  @unique
   password      String
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   voluntario    Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
 }
 
@@ -41,7 +46,10 @@ model Voluntario {
   correo_personal    String?
 
   fecha_ingreso      DateTime  @default(now())
-  estado              String   @default("ACTIVO")
+  fecha_creacion     DateTime  @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   observaciones      String?
   // Relaciones con otras tablas
@@ -53,7 +61,7 @@ model Voluntario {
   informeIngresoProductos      informeIngresoProducto[]
   informesEmergencia           informeEmergencia[]
   maquinista                   Maquinista?
-  conducciones                 Maqui_condujo_vehi[]
+  //conducciones                 Maqui_condujo_vehi[]
   recepcionesEmergencia        Vol_recepcion_emer[]
   turnosTrayecto               TurnoTrayecto[]
   cargosTrayecto               CargoTrayecto[]
@@ -73,6 +81,11 @@ model Emergencia {
   id_gravedad   Int
   id_voluntario Int
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   gravedad   Gravedad   @relation(fields: [id_gravedad], references: [id_gravedad])
   voluntario Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
 
@@ -88,6 +101,11 @@ model TipoEmergencia {
   id_tipoEmergencia Int @id @default(autoincrement())
   nombre            String
   codigo            String
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   emergencias Emer_tiene_TipoEmer[]
 }
@@ -106,6 +124,11 @@ model Gravedad {
   id_gravedad Int @id @default(autoincrement())
   nombre      String
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   emergencias Emergencia[]
 }
 
@@ -114,36 +137,44 @@ model Gravedad {
 // -------------------------
 model Vehiculo {
   id_vehiculo          Int @id @default(autoincrement())
-  nombre               String
+ // nombre               String
   kilometrajeUtilizado Int
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
-  lotesVehiculo        loteVehiculo[]
+ // lotesVehiculo        loteVehiculo[]
+ //ingresos ingresoInformeVehiculo[]
   mantenimientos       Mantenimiento[]
   emergencias          Vehi_participo_emer[]
   maquinistasCondujo   Maqui_condujo_vehi[]
-}
 
+  id_ingresoInformeVehiculo Int @unique
+ ingreso ingresoInformeVehiculo @relation(fields: [id_ingresoInformeVehiculo], references: [id_ingresoInformeVehiculo])
+}
+/*
 model loteVehiculo {
   id_loteVehiculo Int @id @default(autoincrement())
   stock           Int
   tipo            String
-  id_vehiculo     Int
+  id_vehiculo     Int 
 
   vehiculo        Vehiculo @relation(fields: [id_vehiculo], references: [id_vehiculo])
   // relación con ingresoInformeVehiculo a través de la tabla contenedora
   contieneIngresos lotVehi_contiene_ingInfVehi[]
   ingresos         ingresoInformeVehiculo[] @relation("loteVehiculo_ingresos")
-}
+}*/
 
-model lotVehi_contiene_ingInfVehi {
-  id_loteVehiculo           Int
-  id_informeIngresoVehiculo Int
+  /*model lotVehi_contiene_ingInfVehi {
+    id_loteVehiculo           Int
+    id_informeIngresoVehiculo Int
 
-  loteVehiculo        loteVehiculo          @relation(fields: [id_loteVehiculo], references: [id_loteVehiculo])
-  ingresoVehiculo     ingresoInformeVehiculo @relation(fields: [id_informeIngresoVehiculo], references: [id_ingresoInformeVehiculo])
+    loteVehiculo        loteVehiculo          @relation(fields: [id_loteVehiculo], references: [id_loteVehiculo])
+    ingresoVehiculo     ingresoInformeVehiculo @relation(fields: [id_informeIngresoVehiculo], references: [id_ingresoInformeVehiculo])
 
-  @@id([id_loteVehiculo, id_informeIngresoVehiculo])
-}
+    @@id([id_loteVehiculo, id_informeIngresoVehiculo])
+  }*/
 
 model ingresoInformeVehiculo {
   id_ingresoInformeVehiculo Int @id @default(autoincrement())
@@ -159,14 +190,22 @@ model ingresoInformeVehiculo {
   intervaloTiempoRevision   String
   registroDocumentacion     String
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   id_voluntario Int
   voluntario    Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
 
   // campo opcional para relacionar directamente con un lote (si se necesita)
-  id_loteVehiculo Int? 
-  loteVehiculo    loteVehiculo? @relation("loteVehiculo_ingresos", fields: [id_loteVehiculo], references: [id_loteVehiculo])
+ // id_loteVehiculo Int? 
+ // loteVehiculo    loteVehiculo? @relation("loteVehiculo_ingresos", fields: [id_loteVehiculo], references: [id_loteVehiculo])
 
-  lotesContenedor lotVehi_contiene_ingInfVehi[]
+ // lotesContenedor lotVehi_contiene_ingInfVehi[]
+ //id_vehiculo Int
+//vehiculo Vehiculo @relation(fields: [id_vehiculo], references: [id_vehiculo])
+vehiculo                     Vehiculo? 
 }
 
 // -------------------------
@@ -178,6 +217,11 @@ model Mantenimiento {
   fecha            DateTime
   id_vehiculo      Int
   id_voluntario    Int
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   vehiculo   Vehiculo   @relation(fields: [id_vehiculo], references: [id_vehiculo])
   voluntario Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
@@ -216,6 +260,10 @@ model registroMaterial {
   id_registroMaterial Int @id @default(autoincrement())
   unidadMedida        String
   cantidadUnidad      Int
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
   // relaciones
   lotes               regisMate_tiene_loteMatel[]
   emergenciasUso      Emergencia_utilizo_registroMaterial[]
@@ -225,6 +273,10 @@ model loteMaterial {
   id_loteMaterial Int @id @default(autoincrement())
   stock           Int
   tipo            String
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   informes        informeIngresoMaterial[]
   registros       regisMate_tiene_loteMatel[]
@@ -234,7 +286,7 @@ model loteMaterial {
 model informeIngresoMaterial {
   id_informeIngresoMaterial Int @id @default(autoincrement())
   tipo             String
-  estado           String
+  estado           String   @default("A")
   marca            String
   modelo           String
   numSerie         String
@@ -248,6 +300,10 @@ model informeIngresoMaterial {
   unidadMedida     String
   fechaLimiteUso   DateTime
   intervaloTiempoRevision String
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  id_modificacion    Int?
 
   id_voluntario Int
   voluntario    Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
@@ -301,6 +357,11 @@ model informeEmergencia {
   id_Emergencia        Int
   id_voluntario        Int
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   emergencia Emergencia @relation(fields: [id_Emergencia], references: [id_emergencia])
   voluntario Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
 }
@@ -313,16 +374,22 @@ model Maquinista {
   tipoLicencia  String
   fecha         DateTime
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   voluntario    Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
+  vehiculosConducidos Maqui_condujo_vehi[] 
 }
 
 model Maqui_condujo_vehi {
   id_voluntario Int
   id_vehiculo   Int
 
-  voluntario Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
+  //voluntario Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
   vehiculo   Vehiculo   @relation(fields: [id_vehiculo], references: [id_vehiculo])
-
+  maquinista    Maquinista @relation(fields: [id_voluntario], references: [id_voluntario])
   @@id([id_voluntario, id_vehiculo])
 }
 
@@ -336,6 +403,11 @@ model registroProducto {
   cantidad            Int
   id_emergencia       Int
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   emergencia Emergencia @relation(fields: [id_emergencia], references: [id_emergencia])
   lotes     lotProduc_proviene_regisProd[]
 }
@@ -344,6 +416,11 @@ model loteProducto {
   id_loteProducto Int @id @default(autoincrement())
   tipo            String
   stock           Int
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   informes        informeIngresoProducto[]
   registros       lotProduc_proviene_regisProd[]
@@ -368,10 +445,13 @@ model informeIngresoProducto {
   unidadMedida    String
   marca           String
   estado          String
-  fechaCreacion   DateTime
+  fechaCreacion   DateTime @default(now())
   fechaCaducidad  DateTime
   registroMantenimiento String
   fechaAdquisicion DateTime
+
+  fecha_modificacion DateTime? @updatedAt
+  id_modificacion    Int?
 
   id_voluntario Int
   voluntario    Voluntario @relation(fields: [id_voluntario], references: [id_voluntario])
@@ -400,6 +480,11 @@ model Turno {
   id_turno Int @id @default(autoincrement())
   nombre   String
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   trayectos TurnoTrayecto[]
 }
 
@@ -407,12 +492,22 @@ model Cargo {
   id_cargo Int @id @default(autoincrement())
   nombre   String
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   trayectos CargoTrayecto[]
 }
 
 model Rol {
   id_rol Int @id @default(autoincrement())
   nombre  String
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   trayectos RolTrayecto[]
 }
@@ -425,6 +520,11 @@ model TurnoTrayecto {
   id_turno         Int
   d_voluntario     Int
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   turno      Turno      @relation(fields: [id_turno], references: [id_turno])
   voluntario Voluntario @relation(fields: [d_voluntario], references: [id_voluntario])
 }
@@ -435,6 +535,11 @@ model CargoTrayecto {
   id_cargo         Int
   d_voluntario     Int
 
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
+
   cargo      Cargo      @relation(fields: [id_cargo], references: [id_cargo])
   voluntario Voluntario @relation(fields: [d_voluntario], references: [id_voluntario])
 }
@@ -444,6 +549,11 @@ model RolTrayecto {
   fecha          DateTime
   id_rol         Int
   d_voluntario   Int
+
+  fecha_creacion     DateTime @default(now())
+  fecha_modificacion DateTime? @updatedAt
+  estado             String   @default("A")
+  id_modificacion    Int?
 
   rol        Rol        @relation(fields: [id_rol], references: [id_rol])
   voluntario Voluntario @relation(fields: [d_voluntario], references: [id_voluntario])

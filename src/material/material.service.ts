@@ -44,6 +44,27 @@ export class MaterialService {
       };
     });
   }
+  
+
+  async actualizarMaterial(id: number, dto: CreateInformeMaterialDto) {
+  return await this.prisma.informeIngresoMaterial.update({
+    where: { 
+      id_informeIngresoMaterial: id // Aquí va la columna que es llave primaria en tu tabla
+    },
+    data: dto
+  });
+}
+async eliminarMaterial(id: number, dto:any) {
+  return await this.prisma.informeIngresoMaterial.update({
+    where: { 
+      id_informeIngresoMaterial: id // Aquí va la columna que es llave primaria en tu tabla
+    },
+    data: {
+      estado:dto.estado,
+    }
+  });
+}
+
   //crear lote 
 async crearLote(dto: CrearLoteMaterialDto){
   return this.prisma.loteMaterial.create({
@@ -60,7 +81,7 @@ async crearLote(dto: CrearLoteMaterialDto){
   })
   
 }*/
-async actualizarLote(id: number, dto: CrearLoteMaterialDto) {
+async actualizarLote(id: number, dto: any) {
   return await this.prisma.loteMaterial.update({
     where: {
       id_loteMaterial: id // Asegúrate que el nombre coincida con tu schema.prisma
@@ -87,7 +108,7 @@ return this.prisma.emergencia_utilizo_registroMaterial.create({
 
 //listar
 
-async listarInformeIngresoMaterial(){
+/*async listarInformeIngresoMaterial(){
   return this.prisma.informeIngresoMaterial.findMany({
     include: {
       voluntario: {
@@ -108,7 +129,33 @@ async listarInformeIngresoMaterial(){
       fechaAdquisicion: 'desc',
     },
   });
+}*/
+async listarInformeIngresoMaterial(){
+  return this.prisma.informeIngresoMaterial.findMany({
+    where:{
+      estado: { not: 'B' },
+    },
+    include: {
+      voluntario: {
+        select: {
+          id_voluntario: true,
+          nombre: true,
+          apellido_paterno: true,
+        },
+      },
+      loteMaterial: true,
+      lotesContenedor: {
+        include: {
+          loteMaterial: true,
+        },
+      },
+    },
+    orderBy: {
+      fechaAdquisicion: 'desc',
+    },
+  });
 }
+
 async loteMaterialConInformeMaterial(){
   return this.prisma.loteMaterial.findMany({
     include: {

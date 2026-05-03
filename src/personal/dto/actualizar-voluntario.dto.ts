@@ -10,8 +10,9 @@ export class ActualizaVoluntarioDto {
     sexo: string;
     direccion: string;
     correo_personal: string;
-    estado: 'ACTIVO' | 'INACTIVO'| 'DE-BAJA'| 'otro'; // Ejemplo de unión de tipos
+    estado: 'A' | 'B' | 'otro'; // Ejemplo de unión de tipos
     observaciones: string;
   };
   idUsuario: number;
+  id_modificacion?: number;
 }
