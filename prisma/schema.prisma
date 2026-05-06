@@ -74,6 +74,7 @@ model Voluntario {
 model Emergencia {
   id_emergencia Int      @id @default(autoincrement())
   fecha         DateTime
+  hora         String
   direccion     String
   cel_ref       String
   nombrePersona String

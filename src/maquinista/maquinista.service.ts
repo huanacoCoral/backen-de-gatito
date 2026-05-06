@@ -30,10 +30,49 @@ export class MaquinistaService {
       id_voluntario: dto.id_voluntario,
       tipoLicencia: dto.tipoLicencia,
       fecha: new Date(dto.fecha),
+      id_modificacion:dto.id_modificacion
     },
   });
 }
+async editar(id: number, dto: any) {
+  return await this.prisma.maquinista.update({
+    where: { id_voluntario: id }, // Ajusta 'id_maquinista' al nombre real en tu esquema
+    data: {
+      id_voluntario: dto.id_voluntario,
+      tipoLicencia: dto.tipoLicencia,
+      fecha: new Date(dto.fecha),
+      id_modificacion: dto.id_modificacion
+    },
+  });
+}
+async eliminar(id: number, dto: any) {
+  return await this.prisma.maquinista.update({
+    where: { id_voluntario: id },
+    data: {
+      estado: 'B',
+      id_modificacion: dto.id_modificacion
+    },
+  });
+}
+
+async maquinistaVolverActivar(id: number, dto: any) {
+  return await this.prisma.maquinista.update({
+    where: { id_voluntario: id },
+    data: {
+      estado: 'A',
+      id_modificacion: dto.id_modificacion
+    },
+  });
+}
+
 listar(){
-    return this.prisma.maquinista.findMany()
+    return this.prisma.maquinista.findMany({
+      where: {
+    estado: 'A', // O el valor que necesites filtrar
+  },
+  include: {
+      voluntario: true, // Esto trae todos los campos de la tabla voluntario
+    },
+    })
 }
 }

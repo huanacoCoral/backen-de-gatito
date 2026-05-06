@@ -4,8 +4,19 @@ export class CrearCargoDto{
     fechaInicio: string;
     fechaFin:string;
     dia:string;
+    id_modificacion?:number;
 
 }
+export class UpdateTurnoTrayectoDto {
+  fechaInicio?: string | Date;
+  fechaFin?: string | Date;
+  dia?: string;
+  id_turno?: number;
+  d_voluntario?: number;
+  estado?: string;
+  id_modificacion?: number;
+}
+
 /*model TurnoTrayecto {
   id_turnoTrayecto Int @id @default(autoincrement())
   fechaInicio      DateTime?

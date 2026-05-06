@@ -21,6 +21,7 @@ export class PersonalService {
       },
     });
   }
+  /* si hay error al listar verificar aqui 
   listarPersonal(){
     return this.prisma.voluntario.findMany({
       where: {
@@ -28,8 +29,55 @@ export class PersonalService {
           not: 'B',
         },
       },
+      
     });
+  }*/
+ async listarPersonal() {
+  try {
+    return await this.prisma.voluntario.findMany({
+      where: {
+        estado: {
+          not: 'B', // Trae todos los que NO están en estado 'B' (Baja)
+        },
+      },
+      include: {
+        // 1. Datos de cuenta
+        usuario: {
+          select: { email: true, estado: true }
+        },
+        // 2. ¿Es maquinista?
+        maquinista: true,
+        // 3. Turno actual (solo el activo 'A')
+        turnosTrayecto: {
+          where: { estado: 'A' },
+          include: { 
+            turno: {
+              select: { nombre: true } // Solo el nombre para no sobrecargar
+            } 
+          }
+        },
+        // 4. Rol operativo actual (ej. Radio Operador, Rescatista)
+        rolesTrayecto: {
+          where: { estado: 'A' },
+          include: { rol: true }
+        },
+        // 5. Grado o Cargo jerárquico
+        cargosTrayecto: {
+          where: { estado: 'A' },
+          include: { cargo: true }
+        }
+      },
+      orderBy: {
+        apellido_paterno: 'asc' // Opcional: Listar alfabéticamente
+      }
+    });
+  } catch (error) {
+    console.error("Error al listar personal:", error);
+    throw error;
   }
+
+} 
+
   listarPersonalDeBaja() {
     return this.prisma.voluntario.findMany({
       where: {
@@ -54,6 +102,7 @@ crearVoluntario(dto: CreateVoluntarioDto) {
         direccion:           dto.direccion,
         correo_personal:     dto.correo_personal,
         observaciones:       dto.observaciones,
+        id_modificacion: dto.id_modificacion
       },
   });
 }
@@ -119,6 +168,35 @@ async eliminar( dto: any) {
     data: voluntarioActualizado
   };
 }
+async activar( dto: any) {
+    console.log("tenemos eliminar--", dto);  
+  const voluntarioActualizado = await this.prisma.voluntario.update({
+    where: { id_voluntario: dto.id_voluntario },
+    data: {
+      nombre:              dto.nombre,
+      apellido_paterno:    dto.apellido_paterno,
+      apellido_materno:    dto.apellido_materno,
+      ci:                  dto.ci,
+      telefono:            dto.telefono,
+      telefono_emergencia: dto.telefono_emergencia,
+      fecha_nacimiento:    dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
+      sexo:                dto.sexo,
+      direccion:           dto.direccion,
+      correo_personal:     dto.correo_personal,
+      observaciones:       dto.observaciones,
+      estado: 'A',
+      id_modificacion: dto.id_modificacion,
+    },
+  });
+
+  // Retornamos un objeto con un mensaje y los datos nuevos
+  return {
+    message: 'Voluntario eliminado correctamente',
+    status: 'success',
+    data: voluntarioActualizado
+  };
+}
+
 //Rol
 listarRol(){
   return this.prisma.rol.findMany();
@@ -165,7 +243,14 @@ async agregarCargo(dato:any){
 /// agregar horarios
 //listar turnos
 listarTurno(){
-   return this.prisma.turno.findMany();
+   return this.prisma.turno.findMany({
+    where: {
+      estado: 'A' 
+    },
+    orderBy: {
+      id_turno: 'asc' 
+    }
+  });
 }
   
 }

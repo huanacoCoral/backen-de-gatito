@@ -14,6 +14,7 @@ export class EmergenciasService {
     return this.prisma.emergencia.create({
       data: {
         fecha: new Date(),
+        hora: dto.hora,
         direccion: dto.direccion,
         cel_ref: dto.cel_ref,
         nombrePersona: dto.nombrePersona,
@@ -126,5 +127,69 @@ async listarInformeEmergencias() {
       },
     },
   });
+}
+
+async listarVoluntariosDisponibles(fecha: string, dia: number, hora: string) {
+  //console.log(fecha,"string", dia,"----", hora,"-----");
+  console.log('informacion--',fecha,'--dia--',dia,'--hora--',hora);
+  
+  const partes = fecha.split('/');
+// Ojo: el mes en JavaScript empieza en 0 (Enero es 0, Mayo es 4)
+const fechaBusqueda = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+console.log("------>fechabusqueda",fechaBusqueda);
+
+  //console.log("fechaBusqueda",fechaBusqueda);
+  
+const trayectos = await this.prisma.turnoTrayecto.findMany({ });
+console.log("trayectos encontrados:", JSON.stringify(trayectos, null, 2));
+
+  try {
+    const trayectos = await this.prisma.turnoTrayecto.findMany({
+      where: {
+        estado: "A",
+        dia: dia+'', // "Lunes", "Martes", etc.
+        // Verificamos que la fecha de la emergencia esté dentro del rango de vigencia del trayecto
+        fechaInicio: {
+          lte: fechaBusqueda
+        },
+        fechaFin: {
+          gte: fechaBusqueda
+        }
+      },
+      include: {
+        voluntario: true,
+        turno: true
+      }
+    });
+    console.log("trayectos",trayectos);
+    
+    // Filtrado por el string del turno: "Noche/00:00/08:30"
+    const disponibles = trayectos.filter(t => {
+      if (!t.turno?.nombre) return false;
+
+      const partes = t.turno.nombre.split('/');
+      if (partes.length < 3) return false;
+
+      const [_, inicio, fin] = partes; // Ignoramos el nombre, tomamos inicio y fin
+
+      // Comparación directa de strings de hora "HH:mm" funciona bien en formato 24h
+      // Ejemplo: "14:30" >= "08:00" && "14:30" <= "16:00"
+      
+      // Manejo de turnos que cruzan la medianoche (ej: 22:00 a 06:00)
+      if (inicio > fin) {
+        return hora >= inicio || hora <= fin;
+      }
+
+      return hora >= inicio && hora <= fin;
+    }).map(t => ({
+      ...t.voluntario,
+      turnoAsignado: t.turno.nombre // Información extra útil para el frontend
+    }));
+
+    return disponibles;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al buscar voluntarios");
+  }
 }
 }

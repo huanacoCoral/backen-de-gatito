@@ -37,6 +37,10 @@ export class PersonalController {
   eliminar(@Body() dto: ActualizaVoluntarioDto){
     return this.personalService.eliminar(dto);
   }
+  @Post("activar")
+  activar(@Body() dto: ActualizaVoluntarioDto){
+    return this.personalService.activar(dto);
+  }
   
   @Get("listar_rol")
   listarRol(){

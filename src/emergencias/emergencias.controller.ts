@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,  Get, Request, } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards,  Get, Request, Query, } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -69,5 +69,15 @@ listarInformeEmergencias() {
   return this.emergenciasService.listarInformeEmergencias();
 }
 //
+  @Get('listar-voluntario-disponible')
+  listarVoluntariodisponible(
+    @Query('fecha') fecha: string, 
+    @Query('dia') dia: number, 
+  @Query('hora') hora: string,
+
+  ) {
+    return this.emergenciasService.listarVoluntariosDisponibles(fecha,dia, hora);
+  }
+
 
 }

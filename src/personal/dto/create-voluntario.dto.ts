@@ -12,6 +12,7 @@ export class CreateVoluntarioDto {
 
   direccion:          string;
   correo_personal:    string;
+  id_modificacion: number;
 
   //fecha_ingreso      DateTime  @default(now())
   //estado:              string;   @default("ACTIVO")

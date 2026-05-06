@@ -12,6 +12,7 @@ export class ActualizaVoluntarioDto {
     correo_personal: string;
     estado: 'A' | 'B' | 'otro'; // Ejemplo de unión de tipos
     observaciones: string;
+    id_modificacion?:number;
   };
   idUsuario: number;
   id_modificacion?: number;

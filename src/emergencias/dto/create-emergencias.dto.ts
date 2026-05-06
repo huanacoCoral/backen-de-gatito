@@ -4,4 +4,5 @@ export class CreateEmergenciaDto {
   nombrePersona: string;
   tipoRecepcion: string;
   id_gravedad: number;
+  hora:string
 }
