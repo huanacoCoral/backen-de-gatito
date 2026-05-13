@@ -27,4 +27,26 @@ export class MaquinistaController {
     eliminar(@Param('id') id: string, @Body() dto: any) {
     return this.maquinistaService.eliminar(+id, dto);
     }
+
+
+    //------
+    // CREAR
+  @Post('crear_Condujo_vehi')
+  crearCondujo_vehi(
+    @Body() body: any
+  ) {
+
+    return this.maquinistaService.crearCondujo_vehi(body);
+
+  }
+
+  // LISTAR
+  @Get('listar_Condujo_vehi')
+  listarCondujo_vehi() {
+
+    return this.maquinistaService.listarCondujo_vehi();
+
+  }
+
+  
 }

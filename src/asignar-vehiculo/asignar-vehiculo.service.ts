@@ -19,6 +19,7 @@ export class AsignarVehiculoService {
             data: {
                 id_emergencia: dto.id_emergencia,
                 id_vehiculo: dto.id_vehiculo,
+                 id_voluntario: dto.id_voluntario
             },
         });
     }

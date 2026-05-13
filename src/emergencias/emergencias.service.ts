@@ -10,30 +10,169 @@ import { CrearInformeEmergenciaDto } from './dto/crear-informe-emergencia.dto';
 export class EmergenciasService {
     constructor(private prisma: PrismaService) {}
 
-  crear(dto: CreateEmergenciaDto, id_voluntario: number) {
+  crear(dto: CreateEmergenciaDto) {
     return this.prisma.emergencia.create({
       data: {
+
         fecha: new Date(),
         hora: dto.hora,
         direccion: dto.direccion,
         cel_ref: dto.cel_ref,
         nombrePersona: dto.nombrePersona,
         tipoRecepcion: dto.tipoRecepcion,
+
         id_gravedad: dto.id_gravedad,
-        id_voluntario,
+        id_voluntario:dto.id_voluntario,
       },
     });
   }
+
+  /* funciona pero debe mostrar solo lo que tienen estadoA
+  listar() {
+      return this.prisma.emergencia.findMany({
+    include: {
+      gravedad: true,
+      voluntario: true,
+      // Trae los tipos de emergencia
+      tiposEmergencia: {
+        include: {
+          tipoEmergencia: true // Ajusta este nombre según el modelo en Emer_tiene_TipoEmer
+        }
+      },
+      // Trae los vehículos participantes
+       vehiculos: {
+
+        include: {
+
+          vehiculo: {
+
+            include: {
+              ingreso: true,
+             
+            }
+          },
+          maquinista: {
+
+            include: {
+
+              voluntario: true
+
+            }
+
+          }
+        }
+      },
+      // Trae materiales, productos, informes y recepciones
+      materiales: true,
+      productos: true,
+      informes: true,
+       recepciones: {
+        include: {
+          voluntario: true // Esto trae los datos del Voluntario que recibió
+        }
+      },
+    },
+    where: {
+      estado: 'A' // Opcional: solo traer los activos
+    },
+    orderBy: {
+      id_emergencia: 'desc' // Opcional: los más recientes primero
+    }
+  });
+  }*/
 
   listar() {
-    return this.prisma.emergencia.findMany({
-      include: {
-        gravedad: true,
-        voluntario: true,
-      },
-    });
-  }
+  return this.prisma.emergencia.findMany({
+    where: {
+      estado: 'A'
+    },
 
+    include: {
+
+      gravedad: true,
+
+      voluntario: true,
+
+      // TIPOS DE EMERGENCIA
+      tiposEmergencia: {
+
+        include: {
+
+          tipoEmergencia: true
+
+        }
+
+      },
+
+      // VEHICULOS PARTICIPANTES
+      vehiculos: {
+
+        where: {
+          estado: 'A'
+        },
+
+        include: {
+
+          vehiculo: {
+
+            include: {
+
+              ingreso: true
+
+            }
+
+          },
+
+          maquinista: {
+
+            include: {
+
+              voluntario: true
+
+            }
+
+          }
+
+        }
+
+      },
+
+      // MATERIALES
+      materiales: true,
+
+      // PRODUCTOS
+      productos: true,
+
+      // INFORMES
+      informes: true,
+
+      // RECEPCIONES
+      recepciones: {
+
+        where: {
+          estado: 'A'
+        },
+
+        include: {
+
+          voluntario: true
+
+        }
+
+      }
+
+    },
+
+    orderBy: {
+
+      id_emergencia: 'desc'
+
+    }
+
+  });
+
+}
+ 
   // tipos de emergencia 
   async crearTipoEmergencia(dto: CrearTipoEmergenciaDto) {
   return this.prisma.tipoEmergencia.create({
@@ -50,7 +189,10 @@ async listarTiposEmergencia() {
 
 // aqui estamos asignando es decir relacion de N a N
 async asignarTipoEmergencia(dto: AsignarTipoEmergenciaDto) {
+  console.log(dto,"-----");
+  
   return this.prisma.emer_tiene_TipoEmer.create({
+    
     data: {
       id_emergencia: dto.id_emergencia,
       id_tipoEmergencia: dto.id_tipo_emergencia,
@@ -192,4 +334,385 @@ console.log("trayectos encontrados:", JSON.stringify(trayectos, null, 2));
     throw new Error("Error al buscar voluntarios");
   }
 }
+
+
+//-*
+// ===============================
+// EDITAR EMERGENCIA COMPLETA
+// ===============================
+
+async editarEmergenciaCompleta(id_emergencia: number,data: any) {
+console.log("---->",id_emergencia,"-*-*-",data);
+
+  return await this.prisma.$transaction(async (tx) => {
+
+    // ===================================
+    // 1 ACTUALIZAR EMERGENCIA
+    // ===================================
+
+    const emergencia = await tx.emergencia.update({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        fecha: data.emergencia.fecha,
+
+        hora: data.emergencia.hora,
+
+        direccion: data.emergencia.direccion,
+
+        cel_ref: data.emergencia.cel_ref,
+
+        nombrePersona: data.emergencia.nombrePersona,
+
+        tipoRecepcion: data.emergencia.tipoRecepcion,
+
+        id_gravedad: data.emergencia.id_gravedad,
+
+        id_modificacion:data.emergencia.id_modificacion
+
+      }
+
+    });
+
+    // ===================================
+    // 2 DESACTIVAR RELACIONES VIEJAS
+    // ===================================
+
+    // TIPOS
+    await tx.emer_tiene_TipoEmer.deleteMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      }
+
+    });
+
+    // RECEPCION
+    await tx.vol_recepcion_emer.updateMany({
+
+      where: {
+        id_emergencia: id_emergencia
+      },
+      data: {
+        estado: 'I'
+      }
+
+    });
+
+    // VEHICULOS
+    await tx.vehi_participo_emer.updateMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I'
+
+      }
+
+    });
+
+    // ===================================
+    // 3 INSERTAR NUEVAS RELACIONES
+    // ===================================
+console.log("----data---",data);
+console.log("----datatiposEmergencia---",data.tiposEmergencia);
+
+    // TIPOS
+    for (const tipo of data.tiposEmergencia) {
+
+      await tx.emer_tiene_TipoEmer.create({
+
+        data: {
+
+          id_emergencia: id_emergencia,
+
+          id_tipoEmergencia:tipo.id_tipoEmergencia
+
+        }
+
+      });
+
+    }
+
+    // RECEPCION
+    for (const voluntario of data.voluntariosRecepcion) {
+
+      await tx.vol_recepcion_emer.create({
+
+        data: {
+
+          id_emergencia: id_emergencia,
+
+          id_voluntario: voluntario.id_voluntario,
+
+          estado: 'A'
+
+        }
+
+      });
+
+    }
+
+    // VEHICULOS
+    for (const vehiculo of data.vehiculos) {
+
+      await tx.vehi_participo_emer.create({
+
+        data: {
+
+          id_emergencia: id_emergencia,
+
+          id_vehiculo: vehiculo.id_vehiculo,
+
+          id_voluntario: vehiculo.id_voluntario,
+
+          estado: 'A'
+
+        }
+
+      });
+
+    }
+
+    // ===================================
+  // 4 RETORNAR TODO
+  // ===================================
+
+ const emergenciaCompleta = await tx.emergencia.findUnique({
+
+  where: {
+    id_emergencia: id_emergencia
+  },
+
+  include: {
+
+    gravedad: true,
+
+    voluntario: true,
+
+    // TIPOS DE EMERGENCIA
+    tiposEmergencia: {
+      include: {
+        tipoEmergencia: true
+      }
+    },
+
+    // VOLUNTARIOS RECEPCION
+    recepciones: {
+
+      where: {
+        estado: 'A'
+      },
+
+      include: {
+        voluntario: true
+      }
+
+    },
+
+    // VEHICULOS Y MAQUINISTAS
+    vehiculos: {
+
+      where: {
+        estado: 'A'
+      },
+
+      include: {
+
+        vehiculo: true,
+
+        maquinista: {
+          include: {
+            voluntario: true
+          }
+        }
+
+      }
+
+    }
+
+  }
+
+});
+
+return emergenciaCompleta;
+
+  });
+
+}
+// ===============================
+// ELIMINAR EMERGENCIA
+// ===============================
+
+async eliminarEmergencia(id_emergencia: number,id_modificacion: number) {
+
+  return await this.prisma.$transaction(async (tx) => {
+
+    // EMERGENCIA
+    await tx.emergencia.update({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+
+    });
+
+    // TIPOS
+    await tx.emer_tiene_TipoEmer.deleteMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      }
+
+    });
+
+    // RECEPCIONES
+    await tx.vol_recepcion_emer.updateMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+
+    });
+
+    // VEHICULOS
+    await tx.vehi_participo_emer.updateMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+
+    });
+
+    // INFORMES
+    await tx.informeEmergencia.updateMany({
+
+      where: {
+
+        id_Emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+
+    });
+
+    // PRODUCTOS
+    await tx.registroProducto.updateMany({
+      where: {
+
+        id_emergencia: id_emergencia
+      },
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+    });
+    // MATERIALES
+    await tx.emergencia_utilizo_registroMaterial.updateMany({
+
+      where: {
+
+        id_emergencia: id_emergencia
+
+      },
+
+      data: {
+
+        estado: 'I',
+
+        id_modificacion: id_modificacion
+
+      }
+
+    });
+
+    return {
+
+      message: 'Emergencia eliminada correctamente'
+
+    };
+
+  });
+
+}
+crearInformeEmergenciaTermino(dto: any) {
+  return this.prisma.informeEmergencia.create({
+    data: {
+      id_Emergencia: dto.id_Emergencia,
+      descripcion: dto.descripcion,
+      id_voluntario: dto.id_voluntario,
+    },
+  });
+}
+actualizarInformeEmergenciaTermino(dto: any) {
+  console.log("actulizandooo",dto);
+  
+  return this.prisma.informeEmergencia.update({
+    where: {
+      id_informeEmergencia: dto.id_informeEmergencia,
+    },
+    data: {
+      id_Emergencia: dto.id_Emergencia,
+      descripcion: dto.descripcion,
+      id_modificacion: dto.id_modificacion,
+    },
+  });
+}
+
+
 }

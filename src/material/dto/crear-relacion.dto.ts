@@ -6,4 +6,6 @@ export class loteMatContiInformMateriDto{
 export class CrearEmergenciaUtilizoMaterialRegistradoDto{
      id_emergencia       :number;
   id_registroMaterial :number;
+  id_modificacion:number;
+  
 }

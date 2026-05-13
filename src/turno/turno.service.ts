@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CrearTurnoDto } from './dto/crear-turno.dto';
 import { CrearCargoDto, UpdateTurnoTrayectoDto } from './dto/asignar-turno.dto';
@@ -15,6 +15,50 @@ export class TurnoService {
             data: dto
         });
     }
+    async editarTurnoAdmin( data:any){
+
+  // =========================
+  // VERIFICAR EXISTENCIA
+  // =========================
+
+  const existe = await this.prisma.turno.findUnique({
+
+    where:{
+      id_turno:data.id_turno,
+    },
+  });
+
+  if(!existe){
+
+    throw new BadRequestException(
+      'El turno no existe'
+    );
+  }
+
+  // =========================
+  // ACTUALIZAR
+  // =========================
+
+  const turnoActualizado =
+  await this.prisma.turno.update({
+
+    where:{
+      id_turno:data.id_turno,
+    },
+
+    data:{
+
+      nombre:data.nombre,
+
+      estado:data.estado,
+
+      id_modificacion:
+        data.id_modificacion,
+    },
+  });
+
+  return turnoActualizado;
+}
 
 
     listarTurnosTrayecto() {

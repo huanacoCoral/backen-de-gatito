@@ -1,4 +1,5 @@
 export class CrearRegistroMaterialDto{
-    unidadMedida        :string;
-    cantidadUnidad      :number
+    cantidadUnidad        :string;
+    cantidadUsada      :number;
+    id_modificacion: number;
 }

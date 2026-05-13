@@ -45,7 +45,7 @@ export class TurnoController {
 
           @Post('rango-turno-trayecto')
           async listarTurnoTrayecto( @Body() dto: any) {
-            console.log("---->",dto);
+            console.log("-*--->",dto);
             
             if (!dto.inicio || !dto.fin) {
               throw new BadRequestException('Las fechas de inicio y fin son obligatorias');
@@ -55,6 +55,13 @@ export class TurnoController {
             const fechaFin = new Date(dto.fin);
 
             return await this.turnoService.listarPorRango(fechaInicio, fechaFin);
+          }
+          @Post('editar-turno')
+          editarTurnoAdmin(
+            @Body() data:any){
+
+            return this.turnoService
+            .editarTurnoAdmin(data);
           }
           
 }

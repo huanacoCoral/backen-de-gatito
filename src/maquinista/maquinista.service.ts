@@ -75,4 +75,30 @@ listar(){
     },
     })
 }
+async crearCondujo_vehi(data: any) {
+  console.log("----",data);
+  
+    return await this.prisma.maqui_condujo_vehi.create({
+      data: {
+        id_voluntario: data.id_voluntario,
+        id_vehiculo: data.id_vehiculo
+      }
+    });
+
+  }
+
+  // LISTAR
+  async listarCondujo_vehi() {
+
+    return await this.prisma.maqui_condujo_vehi.findMany({
+      include: {
+        vehiculo: true,
+        maquinista: true
+      }
+    });
+
+  }
+
+  
+
 }

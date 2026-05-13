@@ -5,7 +5,7 @@ import { IngresoVehiculoDto } from './dto/ingreso-vehiculo.dto';
 import { CrearLoteVehiculoDto } from './dto/crear-lote.dto';
 import { RegistrarConduccionDto } from './dto/registrar-conduccion.dto';
 import { MantenimientoDto } from './dto/mantenimiento.dto';
-import { VincularIngresoLoteDto } from './dto/vincular-ingreso-lote.dto';
+import { CrearVehiParticipoEmerDto, VincularIngresoLoteDto } from './dto/vincular-ingreso-lote.dto';
 
 @Controller('vehiculos')
 export class VehiculosController {
@@ -59,11 +59,57 @@ registrarMantenimiento(@Body() dto: MantenimientoDto) {
   return this.vehiculoService.registrarMantenimiento(dto);
 }
 
-@Get()
+@Get('vehiculo')
 listar() {
-  return this.vehiculoService.listar();
+  return this.vehiculoService.listarVehiculo();
 }
+@Post('/vehiculo-emergencia')
+crearVehiculoEmergencia(
+  @Body() dto: CrearVehiParticipoEmerDto
+) {
+  return this.vehiculoService.crearVehiculoEmergencia(dto);
+}
+@Post('/crear-participacion')
+  crearParticipacion(
+    @Body() body: any
+  ) {
+
+    return this.vehiculoService.crearParticipacion(body);
+
+  }
 
 
+  //------
+  @Post('listar-mantenimiento')
+  listarMantenimiento(@Body() dto: any) {
+    return this.vehiculoService.listarMantenimiento(dto);
+  }
+
+  // =========================
+  // ✅ CREAR
+  // =========================
+  @Post('crear-mantenimiento')
+  crearMantenimiento(@Body() dto: any) {
+    return this.vehiculoService.crearMantenimiento(dto);
+  }
+
+  // =========================
+  // ✏️ EDITAR
+  // =========================
+  @Put('editar-mantenimiento')
+  actualizarMantenimiento(@Body() dto: any) {
+    return this.vehiculoService.actualizarMantenimiento(dto);
+  }
+
+  // =========================
+  // ❌ ELIMINAR (SOFT DELETE)
+  // =========================
+   @Put('eliminar-mantenimiento/:id')
+  eliminarMantenimiento(
+    @Param('id') id: string,
+    @Body() dto: any
+  ) {
+    return this.vehiculoService.eliminarMantenimiento(Number(id), dto);
+  }
 
 }

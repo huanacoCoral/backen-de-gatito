@@ -35,10 +35,10 @@ export class MaterialController {
         }
    
 
-    @Post('crear-registro-material')
+    /*@Post('crear-registro-material')
     relacionRegistroMaterial(@Body() dto: CrearRegistroMaterialDto){
         return this.materialService.relacionRegistroMaterial(dto);
-    }
+    }*/
     @Post('relacion-emergencia-utilizo-material')
     relacionEmergenciaUtilizoMaterial(@Body() dto: CrearEmergenciaUtilizoMaterialRegistradoDto){
         return this.materialService.relacionEmergenciaUtilizoMaterial(dto);
@@ -51,10 +51,10 @@ export class MaterialController {
     loteMaterialConInformeMaterial(){
         return this.materialService.loteMaterialConInformeMaterial();
     }
-     @Get('listar-registroMaterial')
+    /* @Get('listar-registroMaterial')
     listarRegistroMaterial(){
         return this.materialService.listarRegistroMaterial();
-    }
+    }*/
    
     @Get ('pruebas')
     contiene(){
@@ -65,7 +65,44 @@ export class MaterialController {
     listarLoteMaterial(){
         return this.materialService.listarLoteMaterial();
     }
-    
 
+    //---registro material
+    // CREAR
+  @Post('crear-registroMaterial')
+  crearRegistroMaterial(
+    @Body() data: CrearRegistroMaterialDto
+  ) {
 
+    return this.materialService.crearRegistroMaterial(data);
+
+  }
+
+  // LISTAR
+  @Get('listar-registroMaterial')
+  listarRegistroMaterial() {
+
+    return this.materialService.listarRegistroMaterial();
+
+  }
+  
+
+  @Post('crear-reg-material-lote')
+crear(@Body() data: any) {
+  return this.materialService.crearResitroMaterTieneLote(data);
+}
+
+@Post('editar-reg-material-lote')
+editarResitroMaterTieneLote( @Body() data: any) {
+
+  return this.materialService.editarResitroMaterTieneLote(data);
+
+}
+@Post('eliminar-asignacion')
+eliminarAsignacionMaterial(
+  @Body() data: any
+) {
+
+  return this.materialService.eliminarAsignacionMaterial(data);
+
+}
 }

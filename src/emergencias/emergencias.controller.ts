@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,  Get, Request, Query, } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards,  Get, Request, Query, Put, Param, } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -17,11 +17,14 @@ export class EmergenciasController {
 //@UseGuards(AuthGuard, RolesGuard)
 //@Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
 @Post()
-crear(@Body() dto: CreateEmergenciaDto, @Request() req) {
-  console.log("xxxxx",req);
-    console.log("111111r",req.user);
-    const id_voluntario = req.user.id_voluntario;
-    return this.emergenciasService.crear(dto, id_voluntario);
+crear(
+  @Body() dto: CreateEmergenciaDto, 
+  //@Request() req
+) {
+  //console.log("xxxxx",req);
+    //console.log("111111r",req.user);
+    //const id_voluntario = req.user.id_voluntario;// podemos buscarlo e mplementarlo pero funciona si neso e igual solo registra si es parte de voluntario
+    return this.emergenciasService.crear(dto);
   }
 
   //@Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
@@ -78,6 +81,38 @@ listarInformeEmergencias() {
   ) {
     return this.emergenciasService.listarVoluntariosDisponibles(fecha,dia, hora);
   }
+//-*
+// EDITAR
+@Put(':id')
+editarEmergenciaCompleta(
+ @Param('id') id: string,@Body() data: any
+) {
 
+  return this.emergenciasService.editarEmergenciaCompleta(
+    Number(id),
+    data
+  );
+
+}
+
+// ELIMINAR
+@Put('eliminar/:id')
+eliminarEmergencia(@Param('id') id: string,@Body() data: any) {
+  return this.emergenciasService.eliminarEmergencia(
+    Number(id),
+    data.id_modificacion
+  );
+
+}
+
+@Post('informe-emergencia-termino')
+  crearInformeEmergenciaTermino(@Body() dto: any) {
+    return this.emergenciasService.crearInformeEmergenciaTermino(dto);
+  }
+
+  @Post('actualiza-infrome-emergencia-termino')
+  actualizaactualizarInformeEmergenciaTerminor(@Body() dto: any) {
+    return this.emergenciasService.actualizarInformeEmergenciaTermino(dto);
+  }
 
 }

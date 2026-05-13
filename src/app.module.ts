@@ -48,7 +48,7 @@ import { ProductoModule } from './producto/producto.module';
     CargoModule,
     ProductoModule,
   ],
-  controllers: [AppController,  ProductoController],
-  providers: [AppService, CargoService, ProductoService],
+  controllers: [AppController, ProductoController, LogisticaController],
+  providers: [AppService, CargoService, ProductoService, LogisticaService],
 })
 export class AppModule {}

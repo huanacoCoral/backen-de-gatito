@@ -6,6 +6,7 @@ import { ListarIngesosRealizadoPorVoluntario, ListarLote, ListarPorEmergenciaDto
 import { CrearLoteProductoDto } from './dto/crear-lote-producto.dto';
 import { CrearIngresoProductoDto } from './dto/crear-ingreso-producto.dto';
 import { VincularIngresoLoteDto, VinculoRegistroLoteProductoDto } from './dto/vinculos.dto';
+import { CreateRegistroProductoDto } from './dto/crear-registro-producto.dto';
 
 @Controller('producto')
 export class ProductoController {
@@ -37,6 +38,10 @@ export class ProductoController {
       @Put('actualizar-lote-producto/:id')   
     actualizarLoteProducto(@Param('id') id: string,@Body() dto: CrearLoteProductoDto) {
         return this.productoService.actualizarLoteProducto(+id,dto );
+      }
+      @Put('eliminar-lote-producto/:id')   
+    eliminarLoteProducto(@Param('id') id: string,@Body() dto: CrearLoteProductoDto) {
+        return this.productoService.eliminarLoteProducto(+id,dto );
       }
       @Post('crear-ingreso-producto')   
     createIngresoProducto(@Body() dto: CrearIngresoProductoDto) {
@@ -80,6 +85,19 @@ export class ProductoController {
         return this.productoService.ingresosProductoPorVoluntario(dto );
       }*/
      
+     @Post('crear-registro-producto')
+  crearRegistroProducto(@Body() body: CreateRegistroProductoDto) {
+    return this.productoService.crearRegistroProducto(body);
+  }
 
-
+  
+    @Get('listar-asignaciones-producto')
+  listarRegistroProducto() {
+    return this.productoService.listarRegistroProducto();
+  }
+  
+   @Post('eliminar-asignacion-producto')
+  darBajaRegistroProducto(@Body() body: any) {
+    return this.productoService.darBajaRegistroProducto(body.id_registroProducto,body.id_modificacion);
+  }
 }
