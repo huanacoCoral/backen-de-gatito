@@ -275,8 +275,9 @@ model Vol_recepcion_emer {
 // -------------------------
 model registroMaterial {
   id_registroMaterial Int @id @default(autoincrement())
-  cantidadUnidad        String
-  cantidadUsada       Int
+  tipoMovimiento String?
+  destino        String?
+  observacion       String?
   fecha_creacion     DateTime @default(now())
   fecha_modificacion DateTime? @updatedAt
   estado             String   @default("A")
@@ -373,6 +374,8 @@ model regisMate_tiene_loteMatel {
   fecha_creacion DateTime @default(now())
   fecha_modificacion DateTime? @updatedAt
   id_modificacion Int?
+  cantidad Int?
+  unidad   String?
   registroMaterial registroMaterial @relation(fields: [id_registroMaterial], references: [id_registroMaterial])
   loteMaterial     loteMaterial     @relation(fields: [id_loteMaterial], references: [id_loteMaterial])
 
@@ -433,16 +436,15 @@ model Maqui_condujo_vehi {
 model registroProducto {
   id_registroProducto Int @id @default(autoincrement())
   destino             String
-  unidad              String
-  cantidad            Int
-  id_emergencia       Int
+ 
+  id_emergencia       Int?
 
   fecha_creacion     DateTime @default(now())
   fecha_modificacion DateTime? @updatedAt
   estado             String   @default("A")
   id_modificacion    Int?
 
-  emergencia Emergencia @relation(fields: [id_emergencia], references: [id_emergencia])
+  emergencia Emergencia? @relation(fields: [id_emergencia], references: [id_emergencia])
   lotes     lotProduc_proviene_regisProd[]
 }
 
@@ -465,6 +467,8 @@ model loteProducto {
 model lotProduc_proviene_regisProd {
   id_loteProducto     Int
   id_registroProducto Int
+   unidad              String?
+  cantidad            Int?
 
   loteProducto     loteProducto    @relation(fields: [id_loteProducto], references: [id_loteProducto])
   registroProducto registroProducto @relation(fields: [id_registroProducto], references: [id_registroProducto])

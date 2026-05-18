@@ -69,6 +69,9 @@ listar(){
     return this.prisma.maquinista.findMany({
       where: {
     estado: 'A', // O el valor que necesites filtrar
+    voluntario: {
+      estado: 'A'
+    }
   },
   include: {
       voluntario: true, // Esto trae todos los campos de la tabla voluntario

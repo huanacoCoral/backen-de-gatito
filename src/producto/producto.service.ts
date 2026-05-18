@@ -15,8 +15,8 @@ createRegistroProducto(dto: CrearProductoDto) {
   return this.prisma.registroProducto.create({
     data: {
       destino: dto.destino,
-      unidad: dto.unidad,
-      cantidad: dto.cantidad,
+      //unidad: dto.unidad,
+      //cantidad: dto.cantidad,
       id_emergencia: dto.id_emergencia
     }
   });
@@ -214,69 +214,78 @@ ingresosProductoPorVoluntario(dto: ListarIngesosRealizadoPorVoluntario) {
 
 
 ///------------registro productooo
- async crearRegistroProducto(data: CreateRegistroProductoDto) {
-console.log(data,"---");
+async crearRegistroProducto(data: any) {
+console.log("----mira",data);
 
   return await this.prisma.$transaction(async (tx) => {
 
-    // verificar emergencia
-    const emergencia = await tx.emergencia.findUnique({
-      where: {
-        id_emergencia: data.id_emergencia,
-      },
-    });
+    // =========================
+    // VALIDAR EMERGENCIA
+    // =========================
 
-    if (!emergencia) {
-      throw new BadRequestException('La emergencia no existe');
-    }
+    if (data.id_emergencia) {
 
-    for (const lote of data.lotes) {
-
-      const existeLote = await tx.loteProducto.findUnique({
+      const emergencia = await tx.emergencia.findUnique({
         where: {
-          id_loteProducto: lote.id_loteProducto,
+          id_emergencia: data.id_emergencia,
         },
       });
 
-      if (!existeLote) {
+      if (!emergencia) {
+        throw new BadRequestException('La emergencia no existe');
+      }
+    }
+
+    // =========================
+    // VALIDAR LOTES Y STOCK
+    // =========================
+
+    for (const item of data.lotes) {
+
+      const lote = await tx.loteProducto.findUnique({
+        where: {
+          id_loteProducto: item.id_loteProducto,
+        },
+      });
+
+      if (!lote) {
         throw new BadRequestException(
-          `El lote ${lote.id_loteProducto} no existe`,
+          `El lote ${item.id_loteProducto} no existe`,
         );
       }
 
-      if (existeLote.stock < lote.cantidad) {
+      if (lote.stock < item.cantidad) {
         throw new BadRequestException(
-          `Stock insuficiente en el lote ${lote.id_loteProducto}`,
+          `Stock insuficiente en el lote ${item.id_loteProducto}`,
         );
       }
     }
 
-    // crear registro
+    // =========================
+    // CREAR MOVIMIENTO
+    // =========================
+
     const nuevoRegistro = await tx.registroProducto.create({
       data: {
+
         destino: data.destino,
-        unidad: data.unidad,
-        cantidad: data.cantidad,
+
         id_modificacion: data.id_modificacion,
-        emergencia: {
-          connect: {
-            id_emergencia: data.id_emergencia,
-          },
-        },
+
+        id_emergencia: data.id_emergencia ?? null,
 
         lotes: {
-          create: data.lotes.map((lote) => ({
-            loteProducto: {
-              connect: {
-                id_loteProducto: lote.id_loteProducto,
-              },
-            },
+          create: data.lotes.map((item) => ({
+            id_loteProducto: item.id_loteProducto,
+            cantidad: item.cantidad,
+            unidad: item.unidad,
           })),
         },
       },
 
       include: {
         emergencia: true,
+
         lotes: {
           include: {
             loteProducto: true,
@@ -285,22 +294,22 @@ console.log(data,"---");
       },
     });
 
-    // descontar stock
-    console.log("data.lotes",data.lotes);
-    
-    for (const lote of data.lotes) {
-console.log("--->",lote);
+    // =========================
+    // DESCONTAR STOCK
+    // =========================
+
+    for (const item of data.lotes) {
+
       await tx.loteProducto.update({
-        
         where: {
-          id_loteProducto: lote.id_loteProducto,
+          id_loteProducto: item.id_loteProducto,
         },
-        
-        
+
         data: {
           stock: {
-            decrement: lote.cantidad,
+            decrement: item.cantidad,
           },
+
           id_modificacion: data.id_modificacion,
         },
       });
@@ -309,6 +318,7 @@ console.log("--->",lote);
     return nuevoRegistro;
   });
 }
+
 async listarRegistroProducto() {
    const x= await this.prisma.registroProducto.findMany({
     
@@ -421,104 +431,107 @@ async listarRegistroProducto() {
   return x;
 }
 async darBajaRegistroProducto(
-    id_registroProducto: number,
-    id_modificacion: number,
-  ) {
+  id_registroProducto: number,
+  id_modificacion: number,
+) {
 
-    return await this.prisma.$transaction(async (tx) => {
+  return await this.prisma.$transaction(async (tx) => {
 
-      // =====================================
-      // VERIFICAR EXISTENCIA
-      // =====================================
-      const existe = await tx.registroProducto.findUnique({
-        where: {
-          id_registroProducto,
-        },
+    // =====================================
+    // VERIFICAR EXISTENCIA
+    // =====================================
 
-        include: {
-          lotes: true,
-        },
-      });
+    const existe = await tx.registroProducto.findUnique({
+      where: {
+        id_registroProducto,
+      },
 
-      if (!existe) {
-        throw new BadRequestException(
-          'El registroProducto no existe',
-        );
-      }
-
-      // =====================================
-      // SI YA ESTÁ INACTIVO
-      // =====================================
-      if (existe.estado === 'I') {
-        throw new BadRequestException(
-          'El registroProducto ya está dado de baja',
-        );
-      }
-
-      // =====================================
-      // DEVOLVER STOCK A LOS LOTES
-      // =====================================
-      // Aquí asumimos que "cantidad"
-      // fue descontada de cada lote.
-      // Si luego guardas cantidades
-      // individuales en la tabla intermedia,
-      // deberías usar esa cantidad.
-      // =====================================
-
-      for (const lote of existe.lotes) {
-
-        await tx.loteProducto.update({
-          where: {
-            id_loteProducto: lote.id_loteProducto,
-          },
-
-          data: {
-            stock: {
-              increment: existe.cantidad,
-            },
-
-            id_modificacion,
-          },
-        });
-      }
-
-      // =====================================
-      // DAR BAJA TABLA INTERMEDIA
-      // =====================================
-      // SOLO SI TIENE CAMPO estado
-      // =====================================
-
-      /*
-      await tx.lotProduc_proviene_regisProd.updateMany({
-        where: {
-          id_registroProducto,
-        },
-
-        data: {
-          estado: 'I',
-          id_modificacion,
-        },
-      });
-      */
-
-      // =====================================
-      // DAR BAJA REGISTRO PRODUCTO
-      // =====================================
-
-      const baja = await tx.registroProducto.update({
-        where: {
-          id_registroProducto,
-        },
-
-        data: {
-          estado: 'I',
-          id_modificacion,
-        },
-      });
-
-      return baja;
+      include: {
+        lotes: true,
+      },
     });
-  }
+
+    if (!existe) {
+      throw new BadRequestException(
+        'El movimiento no existe',
+      );
+    }
+
+    // =====================================
+    // VALIDAR SI YA ESTÁ INACTIVO
+    // =====================================
+
+    if (existe.estado === 'I') {
+      throw new BadRequestException(
+        'El movimiento ya fue dado de baja',
+      );
+    }
+
+    // =====================================
+    // DEVOLVER STOCK
+    // =====================================
+
+    for (const lote of existe.lotes) {
+
+      await tx.loteProducto.update({
+
+        where: {
+          id_loteProducto: lote.id_loteProducto,
+        },
+
+        data: {
+
+          stock: {
+            increment: lote.cantidad ?? 0,
+          },
+
+          id_modificacion,
+        },
+      });
+    }
+
+    // =====================================
+    // DAR BAJA DETALLES
+    // =====================================
+
+    /*
+    SOLO SI AGREGAS:
+    estado String @default("A")
+    EN lotProduc_proviene_regisProd
+    */
+
+    /*
+    await tx.lotProduc_proviene_regisProd.updateMany({
+
+      where: {
+        id_registroProducto,
+      },
+
+      data: {
+        estado: 'I',
+      },
+    });
+    */
+
+    // =====================================
+    // DAR BAJA MOVIMIENTO
+    // =====================================
+
+    const baja = await tx.registroProducto.update({
+
+      where: {
+        id_registroProducto,
+      },
+
+      data: {
+        estado: 'I',
+        id_modificacion,
+      },
+    });
+
+    return baja;
+  });
+}
 
 
 }

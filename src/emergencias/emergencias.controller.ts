@@ -46,6 +46,15 @@ listarTipos() {
   return this.emergenciasService.listarTiposEmergencia();
 }
 
+ @Post('editar-tipo-emergencia')
+editarTipoEmergencia(@Body() dto: CrearTipoEmergenciaDto) {
+  return this.emergenciasService.editarTipoEmergencia(dto);
+}
+@Post('eliminar-tipo-emergencia')
+eliminarTipoEmergencia(@Body() dto: CrearTipoEmergenciaDto) {
+  return this.emergenciasService.eliminarTipoEmergencia(dto);
+}
+
 //estamos asignando el tipo a emergencia 
 @Post('asignar-tipo')
 asignarTipo(@Body() dto: AsignarTipoEmergenciaDto) {

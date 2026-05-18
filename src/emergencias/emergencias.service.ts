@@ -176,16 +176,47 @@ export class EmergenciasService {
   // tipos de emergencia 
   async crearTipoEmergencia(dto: CrearTipoEmergenciaDto) {
   return this.prisma.tipoEmergencia.create({
+    
     data: {
       nombre: dto.nombre,
       codigo: dto.codigo,
+      id_modificacion:dto.id_modificacion
     },
   });
 }
 
 async listarTiposEmergencia() {
-  return this.prisma.tipoEmergencia.findMany();
+  return this.prisma.tipoEmergencia.findMany({
+    where:{
+      estado:'A'
+    }
+  });
 }
+  async editarTipoEmergencia(dto: CrearTipoEmergenciaDto) {
+  return this.prisma.tipoEmergencia.update({
+    where:{
+      id_tipoEmergencia:dto.id_tipoEmergencia
+    },
+    data: {
+      nombre: dto.nombre,
+      codigo: dto.codigo,
+      id_modificacion:dto.id_modificacion,
+      estado:dto.estado
+    },
+  });
+}
+ async eliminarTipoEmergencia(dto: any) {
+  return this.prisma.tipoEmergencia.update({
+    where:{
+      id_tipoEmergencia:dto.id_tipoEmergencia
+    },
+    data: {
+      id_modificacion:dto.id_modificacion,
+      estado:dto.estado
+    },
+  });
+}
+
 
 // aqui estamos asignando es decir relacion de N a N
 async asignarTipoEmergencia(dto: AsignarTipoEmergenciaDto) {

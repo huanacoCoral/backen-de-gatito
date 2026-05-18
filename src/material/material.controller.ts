@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { CreateInformeMaterialDto } from './dto/create-material.dto';
 import { CrearLoteMaterialDto } from './dto/crear-lote.dto';
@@ -96,7 +96,7 @@ editarResitroMaterTieneLote( @Body() data: any) {
 
   return this.materialService.editarResitroMaterTieneLote(data);
 
-}
+}/*
 @Post('eliminar-asignacion')
 eliminarAsignacionMaterial(
   @Body() data: any
@@ -104,5 +104,92 @@ eliminarAsignacionMaterial(
 
   return this.materialService.eliminarAsignacionMaterial(data);
 
-}
+}*/
+ // ======================================================
+  // SALIDA MATERIAL
+  // ======================================================
+
+  @Post('salida')
+  crearSalidaMaterial(
+    @Body() body: any,
+  ) {
+
+    return this.materialService.crearSalidaMaterial(body);
+
+  }
+
+  // ======================================================
+  // DEVOLUCION MATERIAL
+  // ======================================================
+
+  @Post('devolucion')
+  crearDevolucionMaterial(
+    @Body() body: any,
+  ) {
+
+    return this.materialService.crearDevolucionMaterial(
+      body,
+    );
+
+  }
+
+  // ======================================================
+  // MATERIAL DAÑADO
+  // ======================================================
+
+  @Post('danado')
+  registrarDanioMaterial(
+    @Body() body: any,
+  ) {
+
+    return this.materialService.registrarDanioMaterial(
+      body,
+    );
+
+  }
+
+  // ======================================================
+  // MATERIAL PERDIDO
+  // ======================================================
+
+  @Post('perdida')
+  registrarPerdidaMaterial(
+    @Body() body: any,
+  ) {
+
+    return this.materialService.registrarPerdidaMaterial(
+      body,
+    );
+
+  }
+
+  // ======================================================
+  // DAR BAJA MOVIMIENTO
+  // ======================================================
+
+  @Delete(
+    'baja/:id_registroMaterial/:id_modificacion',
+  )
+  darBajaMovimientoMaterial(
+
+    @Param(
+      'id_registroMaterial',
+      ParseIntPipe,
+    )
+    id_registroMaterial: number,
+
+    @Param(
+      'id_modificacion',
+      ParseIntPipe,
+    )
+    id_modificacion: number,
+
+  ) {
+
+    return this.materialService.darBajaMovimientoMaterial(
+      id_registroMaterial,
+      id_modificacion,
+    );
+
+  }
 }

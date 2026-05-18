@@ -10,14 +10,15 @@ interface UserDTOEnviando {  // esto acepta que llegen datos desde post o algo a
     id_voluntario: number;
     email: string;
     password: string;
+    id_modificacion: number
 }
 //@UseGuards(AuthGuard)//funciona
 @Controller('auth')
 
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
+    //@UseGuards(AuthGuard, RolesGuard)
+   // @Roles('PERSONAL', 'LOGISTICA','OPERACIONES', 'JEFE_GUARDIA','COMANDANTE')
     @Get("entramos")
     entramos(){
         console.log("estamos probando-----");
@@ -43,7 +44,8 @@ export class AuthController {
         return this.authService.signUp(
             user.id_voluntario,
             user.email,
-            user.password
+            user.password,
+            user.id_modificacion
         );
     }
     
@@ -52,7 +54,7 @@ export class AuthController {
     //@Roles('ADMIN')
     @Post('log-in')
     logIn(@Body() user: UserDTOEnviando) {
-        console.log('user login +++', { user });
+        //console.log('user login +++', { user });
         return this.authService.logIn(user.email, user.password);
     }
    //@UseGuards(AuthGuard)//se supone que esto bloquea pero no funciona --funcion pero verificar 
@@ -69,6 +71,16 @@ export class AuthController {
     return { id: req.user.sub, email: req.user.email, role: req.user.role };
     }*/
 
+    @Post('actualizar-usuario')
+    actualizarUsuario(@Body() user: UserDTOEnviando) {
+        console.log('user login +++', { user });
+        return this.authService.actualizarUsuario(user);
+    }
+    @Post('quitar-usuario')
+    quitarUsuario(@Body() user: any) {
+        console.log('user login +++', { user });
+        return this.authService.quitarUsuario(user);
+    }
     
 
 }

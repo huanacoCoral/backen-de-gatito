@@ -199,11 +199,21 @@ async activar( dto: any) {
 
 //Rol
 listarRol(){
-  return this.prisma.rol.findMany();
+  return this.prisma.rol.findMany(
+    {
+      where: {
+      estado: 'A' 
+    }
+    }
+  );
 }
 //
 listarCargo(){
-   return this.prisma.cargo.findMany();
+   return this.prisma.cargo.findMany({
+      where: {
+      estado: 'A' 
+    }
+    });
 }
 
 // agregar rol
@@ -216,7 +226,8 @@ async agregarRol(dato:any){
         fecha: new Date(dato.fecha),
         id_rol: dato.id_rol,
         // Corregido: id_voluntario en lugar de d_voluntario
-        d_voluntario: dato.d_voluntario 
+        d_voluntario: dato.d_voluntario,
+        id_modificacion:dato.id_modificacion 
       }
     });
   } catch (error) {
@@ -228,13 +239,18 @@ async agregarRol(dato:any){
 async agregarCargo(dato:any){
    console.log('Intentando agregar cargo...',dato);
   try {
-    return await this.prisma.cargoTrayecto.create({
+    const cargoAsignado= await this.prisma.cargoTrayecto.create({
       data: {
         fecha: new Date(dato.fecha),
-        id_cargo: dato.id_cargo,
-        d_voluntario: dato.d_voluntario 
+        id_cargo: Number(dato.id_cargo),
+        d_voluntario: dato.d_voluntario,
+         id_modificacion:dato.id_modificacion
       }
     });
+      return {
+      mensaje: "cargo asignado",
+      data: cargoAsignado
+    };
   } catch (error) {
     console.error("Error al crear el RolTrayecto:", error);
     throw error; // Re-lanzar para manejarlo en el servicio/controlador superior

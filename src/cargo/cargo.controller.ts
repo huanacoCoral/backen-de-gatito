@@ -10,7 +10,7 @@ export class CargoController {
     //
     @Post()
     crear(@Body() dto: CrearCargoDto) {
-        return this.cargoService.crear(dto );
+        return this.cargoService.crear(dto);
       }
     
       //@Roles('OPERADOR', 'LOGISTICA', 'COMANDANTE')
@@ -19,6 +19,14 @@ export class CargoController {
       @Get()
       listar() {
         return this.cargoService.listar();
+      }
+      @Post('editar')
+    editarCargo(@Body() dto: any) {
+        return this.cargoService.editarCargo(dto );
+      }
+      @Post('eliminar')
+    eliminarCargo(@Body() dto: any) {
+        return this.cargoService.eliminarCargo(dto );
       }
 
       @Post('asignar-cargo')

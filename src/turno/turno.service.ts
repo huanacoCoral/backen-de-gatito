@@ -52,8 +52,7 @@ export class TurnoService {
 
       estado:data.estado,
 
-      id_modificacion:
-        data.id_modificacion,
+      id_modificacion: data.id_modificacion,
     },
   });
 

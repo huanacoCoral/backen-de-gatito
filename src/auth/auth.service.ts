@@ -7,37 +7,50 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class AuthService {
     constructor(
-        private prismaService: PrismaService, 
+        private prismaService: PrismaService,
         private jwtService: JwtService
     ) { }
-    async verficar(){
+    async verficar() {
         console.log("entramos aqqui");
-        
+
         return await "logramos entrar "
     }
     async getListar() {
         console.log("intentandolistar");
-        
-        return await this.prismaService.usuario.findMany();//muestra
+
+        return await this.prismaService.usuario.findMany(
+            {
+                select: {
+                    id_voluntario: true,
+                    email: true,
+                    estado: true,
+                    fecha_creacion: true
+                }
+            }
+        );//muestra
     }
-    
-    async listarVoluntarios(){
-        
-        return await this.prismaService.voluntario.findMany();//muestra;
+
+    async listarVoluntarios() {
+
+        return await this.prismaService.voluntario.findMany({
+            where: {
+                estado: 'A'
+            }
+        });
     }
     /// recien de aquiabajo
     // flujo  ya creamos un voluntario(en personal),toca crear un usuario, y darle rol 
-    async signUp(id_voluntario: number,email: string, password: string) {
+    async signUp(id_voluntario: number, email: string, password: string, id_modificacion: number) {
         try {
             // Verificar que el voluntario exista
             const voluntario = await this.prismaService.voluntario.findUnique({
-            where: { id_voluntario },
+                where: { id_voluntario },
             });
             if (!voluntario) {
-            throw new BadRequestException('El voluntario no existe');
+                throw new BadRequestException('El voluntario no existe');
             }
             //roles por defecto ya creados al inicio sera voluntario
-             const rolVoluntario = await this.prismaService.rol.findFirst({
+            const rolVoluntario = await this.prismaService.rol.findFirst({
                 where: { nombre: 'VOLUNTARIO' },
             });
             const userFound = await this.prismaService.usuario.findUnique({ //Ya hay alguien en la lista con este email?”
@@ -49,28 +62,29 @@ export class AuthService {
             const hashedPassword = await encrypt(password);//encripta
 
             const usuario = await this.prismaService.usuario.create({ //creamos al usuario
-            data: {
-                id_voluntario,
-                email,
-                password: hashedPassword
-            },
+                data: {
+                    id_voluntario,
+                    email,
+                    password: hashedPassword,
+                    id_modificacion: id_modificacion
+                },
             });
-            
+
             // Registrar rol inicial
-            await this.prismaService.rolTrayecto.create({ //creamos tryectoria del rol
-            data: {
-                fecha: new Date(),
-                id_rol: rolVoluntario!.id_rol,
-                d_voluntario: id_voluntario,
-            },
-            });
-            
+            /*  await this.prismaService.rolTrayecto.create({ //creamos tryectoria del rol
+              data: {
+                  fecha: new Date(),
+                  id_rol: rolVoluntario!.id_rol,
+                  d_voluntario: id_voluntario,
+              },
+              });*/
+
             const { password: _, ...userWithoutPassword } = usuario; //averiguar que hace:mantiene la informacion de la creacion sin el password ++++lo extrae y lo descarta
             const payload = { ...userWithoutPassword }
             const access_token = await this.jwtService.signAsync(payload);
-           
-           return { access_token };
-           
+
+            return { access_token };
+
         } catch (error) {
             console.error("error al crear")
             if (error instanceof BadGatewayException) { throw error; }
@@ -78,48 +92,89 @@ export class AuthService {
         }
 
     }
+    async actualizarUsuario(datos: any) {
+        const hashedPassword = await encrypt(datos.password);//encripta
+        const voluntario = await this.prismaService.usuario.update({
+            where: {
+                id_voluntario: datos.id_voluntario,
+            },
+            data: {
+                email: datos.usuario,
+                password: hashedPassword,
+                id_modificacion: datos.id_modificacion,
+                estado: 'A',
+            }
+        }
+        )
+        return {
+            mensaje: 'se modifico usuario exitosamente',
+            valor: voluntario
+        }
+    }
+    async quitarUsuario(datos: any) {
+        const voluntario = await this.prismaService.usuario.update({
+            where: {
+                id_voluntario: datos.id_voluntario,
+            },
+            data: {
+                estado: 'B',
+                id_modificacion: datos.id_modificacion
+            }
+        }
+        )
+        return {
+            mensaje: 'se modifico usuario exitosamente',
+            valor: voluntario
+        }
+    }
     async logIn(email: string, password: string) {
         console.log("entramos a login");
         try {
             // buscar si esque existe
+
             const usuario = await this.prismaService.usuario.findUnique({
                 where: {
                     email,
+
                 },
             });
+
             if (!usuario) {
                 throw new BadRequestException('Email invalido.');
+            }
+            if (usuario.estado !== 'A') {
+                throw new BadRequestException('Usuario inactivo');
             }
 
             const isPasswordMatch = await compare(password, usuario.password);//Compara una contraseña en texto plano con una contraseña encriptada (hash)
             if (!isPasswordMatch) {
                 throw new BadGatewayException("malllll pass")
             }
-            
+
             const rolActual = await this.prismaService.rolTrayecto.findFirst({
-            where: { d_voluntario: usuario.id_voluntario },
-            orderBy: { fecha: 'desc' },
-            include: { rol: true },// Realiza un join automático con la tabla o modelo rol
+                where: { d_voluntario: usuario.id_voluntario },
+                orderBy: { fecha: 'desc' },
+                include: { rol: true },// Realiza un join automático con la tabla o modelo rol
             });
 
             if (!rolActual) {
                 throw new BadRequestException('creo q no tiene rol');
             }
             const payload = {
-            id_voluntario: usuario.id_voluntario,
-            email: usuario.email,
-            rol: rolActual.rol.nombre,
+                id_voluntario: usuario.id_voluntario,
+                email: usuario.email,
+                rol: rolActual.rol.nombre,
             };
 
             return {
-            rol: rolActual.rol.nombre,
-            id_voluntario: usuario.id_voluntario,
-            access_token: this.jwtService.sign(payload),
+                rol: rolActual.rol.nombre,
+                id_voluntario: usuario.id_voluntario,
+                access_token: this.jwtService.sign(payload),
             };
 
         } catch (error) {
-            console.error("que hiciste!!!!! control Z",error)
+            console.error("que hiciste!!!!! control Z", error)
         }
     }
-   
+
 }

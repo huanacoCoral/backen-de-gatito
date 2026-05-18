@@ -15,4 +15,8 @@ export class GravedadController {
   listar() {
     return this.gravedadService.listar();
   }
+   @Post('editar')
+  editar(@Body() dto: CreateGravedadDto) {   
+    return this.gravedadService.editar(dto);
+  }
 }

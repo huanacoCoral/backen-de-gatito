@@ -132,6 +132,9 @@ export class VehiculosService {
   // listara al final con todo
   listarVehiculo() {
     return this.prisma.vehiculo.findMany({
+      where:{
+        estado:'A'
+      },
       include: {
 
       ingreso: true,
@@ -255,4 +258,16 @@ async crearParticipacion(data: any) {
       },
     });
   }
+  agregarKilometraje(dto:any){
+     return this.prisma.vehiculo.update({
+    where: {
+        id_vehiculo: dto.id_vehiculo,
+      },
+       data: {
+        kilometrajeUtilizado: dto.kilometrajeUtilizado,
+        id_modificacion:dto.id_modificacion
+      },
+
+  })
+}
 }

@@ -12,12 +12,38 @@ export class CargoService {
         return this.prisma.cargo.create({
           data: {
             nombre:dto.nombre,
+            id_modificacion:dto.id_modificacion
           },
         });
       }
     
       listar() {
-        return this.prisma.cargo.findMany();
+        return this.prisma.cargo.findMany({
+          where:{
+            estado:'A'
+          }
+        });
+      }
+      editarCargo(dto:any){
+        return this.prisma.cargo.update({
+          where:{
+            id_cargo:dto.id_cargo
+          },
+          data: {
+            nombre:dto.nombre,
+            id_modificacion:dto.id_modificacion
+          },
+        });
+      }
+      eliminarCargo(dto:any){
+        return this.prisma.cargo.update({
+          where:{
+            id_cargo:dto.id_cargo
+          },
+          data: {
+            estado:'I'
+          },
+        });
       }
       //asignarCargo
       asignarCargo(dto:AsignarCargoDto)

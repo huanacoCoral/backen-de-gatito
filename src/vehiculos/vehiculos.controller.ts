@@ -111,5 +111,9 @@ crearVehiculoEmergencia(
   ) {
     return this.vehiculoService.eliminarMantenimiento(Number(id), dto);
   }
-
+  
+   @Post('actualizar-kilometraje')
+  agregarKilometraje(@Body() dto: any) {
+    return this.vehiculoService.agregarKilometraje(dto);
+  }
 }
